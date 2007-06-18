@@ -8,24 +8,24 @@ Imagine a simple robot with one camera sensor and two tank-drive wheels.  This d
 
 = Vision =
 
-We will call the first agent FrameGrabber and put him in charge of reading frames from the camera.  FrameGrabber needs to do a little processing in order to combine the RGB color planes into a jpeg.  The resulting compressed images are sent to two other agents, LineDetector and ObjectDetector.
+We will call the first agent Frame Grabber and put him in charge of reading frames from the camera.  Frame Grabber needs to do a little processing in order to combine the RGB color planes into a jpeg.  The resulting compressed images are sent to two other agents, Line Detector and Object Detector.
 
-LineDetector reads a frame and uses a line detection algorithm to find white lines on the ground.  The lines are encoded in slope-intercept form and sent to the Model agent.
+Line Detector reads a frame and uses a line detection algorithm to find white lines on the ground.  The lines are encoded in slope-intercept form and sent to the Model agent.
 
-ObjectDetector filters for orange to detect cones in each frame.  These objects are encoded as points and sent to the Model agent.
+Object Detector filters for orange to detect cones in each frame.  These objects are encoded as points and sent to the Model agent.
 
 
 = Planning =
 
 Model keeps track of objects and boundary lines and stores them in a data structure called the environment model.  Model also reads paths and sends them to the Driver agent if the paths do not intercept an obstacle or line.
 
-The PathGenerator agent reads target waypoints and generates possible ways to get there.  PathGenerator first tries a straight-line path, and then branches out to many variants.  Each potential path is sent to Model for evaluation.
+The Path Generator agent reads target waypoints and generates possible ways to get there.  Path Generator first tries a straight-line path, and then branches out to many variants.  Each potential path is sent to Model for evaluation.
 
-The Navigator agent reads waypoints from a file and sends them to PathGenerator.
+The Navigator agent reads waypoints from a file and sends them to Path Generator.
 
 
 = Control =
 
-The Driver agent reads the latest unobstructed path and directs the LeftWheel and RightWheel agents to follow the path.
+The Driver agent reads the latest unobstructed path and directs the Left Wheel and Right Wheel agents to follow the path.
 
-LeftWheel and RightWheel read target speeds and send control signals to the actuators.
+Left Wheel and Right Wheel read target speeds and send control signals to the actuators.
