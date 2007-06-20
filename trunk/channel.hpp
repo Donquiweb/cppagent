@@ -1,5 +1,8 @@
 
 #include <iostream>
+#include <string>
+
+#include <pthread.h>
 
 namespace CppAgent {
 	
@@ -11,7 +14,10 @@ namespace CppAgent {
 
 	template <class TMessage>
 	class Channel : public BaseChannel {
-		TMessage _Message;
+		TMessage _message;
+		bool _messageValid;
+		pthread_mutex_t _mutex;
+
 
 	protected:
 		int get_NextID () {
@@ -19,8 +25,22 @@ namespace CppAgent {
 
 			return ++count;
 		}
+
+		void lock () {
+			pthread_mutex_lock (&_mutex);
+		}
+
+		void unlock () {
+			pthread_mutex_unlock (&_mutex);
+		}
 	
 	public:
+		Channel () : _messageValid (false) {
+			pthread_mutex_t minit = PTHREAD_MUTEX_INITIALIZER;
+
+			_mutex = minit;
+		}
+
 		int get_ID () {
 			static int id = get_NextID ();
 
@@ -28,11 +48,26 @@ namespace CppAgent {
 		}
 
 		virtual void send (const void *message) {
-			_Message = *static_cast <const TMessage *> (message);
+			lock ();
+			_messageValid = true;
+			_message = *static_cast <const TMessage *> (message);
+			unlock ();
 		}
 
 		virtual void recv (void *message) {
-			*static_cast <TMessage *> (message) = _Message;
+			while (true) {
+				lock ();
+				if (!_messageValid) {
+					unlock ();
+					sleep (0);
+				}
+				else {
+					*static_cast <TMessage *> (message) = _message;
+					_messageValid = false;
+					unlock ();
+					return;
+				}
+			}
 		}
 	};
 
@@ -63,7 +98,15 @@ namespace CppAgent {
 
 			std::cout << "recv'd from channel\n";
 		}
+
+		BaseChannel &operator << (const char *message) {
+			BaseChannel &ch = get_Channel <std::string> ();
+
+			std::string str (message);
+
+			ch.send (&str);
+		}
 	};
 
-	Network anet;
+	Network anet;	// standard agent network
 }
