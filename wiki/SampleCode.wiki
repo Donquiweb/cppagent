@@ -3,7 +3,7 @@
 
 = Introduction =
 
-This code excerpt illustrates the use of the CppAgent API.
+This code excerpt illustrates the use of the !CppAgent API.
 
 {{{
 
